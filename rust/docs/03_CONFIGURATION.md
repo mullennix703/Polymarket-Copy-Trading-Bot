@@ -229,7 +229,7 @@ How long to block trades after circuit breaker trips.
 
 ## 4. Advanced Settings
 
-These are set in code but can be modified by editing `src/config.rs`. Only change if you understand what you're doing.
+These are set in code but can be modified by editing `src/settings.rs`. Only change if you understand what you're doing.
 
 ### Trading Parameters (in code)
 
