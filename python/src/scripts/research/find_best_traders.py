@@ -30,7 +30,7 @@ MAX_TRADES_LIMIT = int(os.getenv('SIM_MAX_TRADES', '2000'))
 KNOWN_TRADERS = [
     '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', # Car
     '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', # Dropper
-    '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', 
+    '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', # HolyMoses7
     '0x8545ff3521691618f2d5e4f5460d76186a5023be',# 1KChallenge
     '0x751a2b86cab503496efd325c8344e10159349ea1',# Sharky6999
     '0x134240c2a99fa2a1cd9db6fc2caa65043259c997',# 1j59y6nk
