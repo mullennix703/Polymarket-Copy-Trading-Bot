@@ -128,7 +128,9 @@ The Python bot has been successfully tested and verified with real transactions 
 
 ### Video Demonstration
 
-📹 **[Watch the bot in action](python-copy-trading-bot.mp4)** - Video demonstration of the Python bot monitoring and copying trades in real-time.
+📹 **python-copy-trading-bot.mp4** - Video demonstration of the Python bot monitoring and copying trades in real-time.
+
+
 
 ### Real Transaction Examples
 
