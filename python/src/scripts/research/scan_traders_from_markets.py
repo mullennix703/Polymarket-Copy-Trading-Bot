@@ -33,9 +33,18 @@ async def fetch_markets_from_traders(limit: int = 20) -> List[Dict[str, Any]]:
     """Fetch markets from known traders' activity"""
     try:
         known_traders = [
-            '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b',
-            '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292',
-            '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8',
+            '0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b', # Car
+            '0x6bab41a0dc40d6dd4c1a915b8c01969479fd1292', # Dropper
+            '0xa4b366ad22fc0d06f1e934ff468e8922431a87b8', # HolyMoses7
+            # '0x8545ff3521691618f2d5e4f5460d76186a5023be',# 1KChallenge
+            '0x751a2b86cab503496efd325c8344e10159349ea1',# Sharky6999
+            # '0x134240c2a99fa2a1cd9db6fc2caa65043259c997',# 1j59y6nk
+            '0xfeb581080aee6dc26c264a647b30a9cd44d5a393',# completion
+            '0xe3726a1b9c6ba2f06585d1c9e01d00afaedaeb38',# cry.eth2
+            '0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1',# aenews2
+            '0x4959175440b8f38229b32f2f036057f6893ea6f5',# Majas
+            # '0x5bffcf561bcae83af680ad600cb99f1184d6ffbe',# YatSen
+            '0x75e765216a57942d738d880ffcda854d9f869080',# 25usdc
         ]
         
         markets_map = {}
@@ -71,24 +80,33 @@ async def fetch_markets_from_traders(limit: int = 20) -> List[Dict[str, Any]]:
 async def extract_traders_from_market(market: Dict[str, Any]) -> Set[str]:
     """Extract trader addresses from a single market"""
     traders = set()
-    asset = market.get('conditionId') or market.get('id')
+    condition_id = market.get('conditionId')
+    asset_id = market.get('asset') or market.get('id')
     
-    if not asset:
-        return traders
-    
-    try:
-        # Get activity for this market/asset
-        activity_url = f'https://data-api.polymarket.com/activity?asset={asset}&type=TRADE&limit=100'
-        activities = await fetch_data_async(activity_url)
+    # Try multiple IDs and parameters
+    for target_id in [condition_id, asset_id]:
+        if not target_id: continue
         
-        if isinstance(activities, list):
-            for activity in activities:
-                user = activity.get('user') or activity.get('owner')
-                if user:
-                    traders.add(user.lower())
-    
-    except Exception:
-        pass
+        for param in ['asset', 'conditionId', 'market']:
+            try:
+                url = f'https://data-api.polymarket.com/activity?{param}={target_id}&type=TRADE&limit=100'
+                activities = await fetch_data_async(url)
+                
+                if isinstance(activities, list) and activities:
+                    for activity in activities:
+                        # Extract user from various possible fields
+                        user = (activity.get('user') or 
+                                activity.get('owner') or 
+                                activity.get('fromAddress') or 
+                                activity.get('proxyAddress'))
+                        
+                        if user and isinstance(user, str) and user.startswith('0x'):
+                            traders.add(user.lower())
+                    
+                    if len(traders) > 0:
+                        return traders # Found something, return early
+            except Exception:
+                continue
     
     return traders
 
@@ -216,8 +234,11 @@ async def scan_traders_from_markets():
         print(f"Found {len(traders)} traders (Total: {len(all_traders)})")
     
     if not all_traders:
-        print(f"{Fore.YELLOW}[WARNING]{Style.RESET_ALL} No traders found in markets")
-        return
+        print(f"{Fore.YELLOW}[WARNING]{Style.RESET_ALL} No traders found in markets, falling back to known traders...")
+        # Fallback to known traders from KNOWN_TRADERS list
+        from src.scripts.research.find_best_traders import KNOWN_TRADERS
+        all_traders = set(KNOWN_TRADERS)
+        print(f"{Fore.GREEN}[OK]{Style.RESET_ALL} Using {len(all_traders)} known traders")
     
     trader_list = list(all_traders)[:MAX_TRADERS_TO_ANALYZE]
     print(f"{Fore.GREEN}[OK]{Style.RESET_ALL} Found {len(trader_list)} unique traders to analyze")
